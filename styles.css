@@ -130,6 +130,10 @@ a {
   outline-offset: 5px;
 }
 
+.game-card + .game-card {
+  margin-top: 22px;
+}
+
 .game-visual {
   position: relative;
   min-height: 420px;
@@ -222,6 +226,120 @@ a {
 .spark-c {
   right: 27%;
   bottom: 20%;
+}
+
+.blindbox-visual {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,0.7) 0 4%, transparent 4.2%),
+    linear-gradient(145deg, #ffd7e8 0%, #d9e9ff 48%, #fff0b9 100%);
+}
+
+.blindbox-visual::before {
+  background:
+    radial-gradient(circle at 20% 25%, rgba(255,255,255,0.42) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 78% 22%, rgba(255,255,255,0.5) 0 3px, transparent 3.5px),
+    radial-gradient(circle at 70% 76%, rgba(255,255,255,0.42) 0 2px, transparent 2.5px);
+  background-size: 76px 76px, 112px 112px, 94px 94px;
+  transform: none;
+  opacity: 1;
+}
+
+.blindbox-visual::after {
+  inset: 7%;
+  border: 1px solid rgba(23, 23, 20, 0.18);
+  clip-path: none;
+}
+
+.blindbox-box,
+.blindbox-lid,
+.blindbox-orb {
+  position: absolute;
+  z-index: 2;
+}
+
+.blindbox-box {
+  width: 188px;
+  height: 188px;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%) rotate(-5deg);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  background: #7ec8ff;
+  box-shadow: 14px 18px 0 rgba(23, 23, 20, 0.12);
+}
+
+.blindbox-lid {
+  width: 214px;
+  height: 46px;
+  left: -16px;
+  top: -24px;
+  border: 3px solid var(--ink);
+  border-radius: 18px 18px 10px 10px;
+  background: #ffd166;
+}
+
+.blindbox-star {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  transform: translate(-50%, -50%);
+  color: #fff7d1;
+  font-size: 70px;
+  line-height: 1;
+  text-shadow: 3px 3px 0 rgba(23, 23, 20, 0.18);
+}
+
+.blindbox-face::before,
+.blindbox-face::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 122px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.blindbox-face::before {
+  left: 62px;
+}
+
+.blindbox-face::after {
+  right: 62px;
+}
+
+.blindbox-orb {
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #ff9ec4;
+}
+
+.blindbox-orb.orb-1 {
+  left: 18%;
+  top: 22%;
+}
+
+.blindbox-orb.orb-2 {
+  right: 17%;
+  top: 28%;
+  width: 24px;
+  height: 24px;
+  background: var(--acid);
+}
+
+.blindbox-orb.orb-3 {
+  right: 22%;
+  bottom: 17%;
+  width: 42px;
+  height: 42px;
+  background: #ffd166;
+}
+
+.game-card--blindbox .kicker {
+  color: #d44f8f;
 }
 
 .game-copy {
