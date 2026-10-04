@@ -10,7 +10,7 @@ This repository is the lightweight static portal for the game collection. Indivi
 - `coop.あそぼ.みんな` — スターコア・ガーディアン / game-coop-defense
 - `box.あそぼ.みんな` — 星くずボックス / game-blind-box
 
-スターコア・ガーディアン runs locally in each visitor's browser. It supports solo play and same-screen co-op on one device (keyboard + gamepad, or two gamepads). Separate pages have independent games; there is no online or LAN matchmaking. Japanese is the default game language.
+スターコア・ガーディアン supports solo play, same-screen co-op on one device, and private online rooms for two devices. Choose 「友だちと遊ぶ」, create a room, and invite a friend by QR code, link, or six-character room code. No account or shared Wi-Fi is required. Solo and same-screen games remain local; online rooms use the game's own server. Japanese is the default language.
 
 ## Stack
 
