@@ -394,6 +394,10 @@ a {
   letter-spacing: -0.055em;
 }
 
+.game-card--blindbox h3 span {
+  white-space: nowrap;
+}
+
 .description {
   max-width: 480px;
   margin: 0;

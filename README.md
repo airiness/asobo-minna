@@ -7,7 +7,10 @@ This repository is the lightweight static portal for the game collection. Indivi
 ## Current routes
 
 - `あそぼ.みんな` — game portal (this repository)
-- `coop.あそぼ.みんな` — 星核守卫 / game-coop-defense
+- `coop.あそぼ.みんな` — スターコア・ガーディアン / game-coop-defense
+- `box.あそぼ.みんな` — 星くずボックス / game-blind-box
+
+スターコア・ガーディアン runs locally in each visitor's browser. It supports solo play and same-screen co-op on one device (keyboard + gamepad, or two gamepads). Separate pages have independent games; there is no online or LAN matchmaking. Japanese is the default game language.
 
 ## Stack
 
