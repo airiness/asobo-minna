@@ -110,9 +110,10 @@ the new files are live immediately.
 }
 ```
 
-Recommended additions to that block (validate and reload Caddy afterwards): keep the checkout's
-`.git` directory private, revalidate files on each visit so a deploy shows up at once (the
-JavaScript modules have stable names), and serve `404.html` with a real 404 status.
+The full block lives in gglab-infra at `caddy/asobo-minna.caddy`. Because the web root is a Git
+checkout, it must hide dotfiles so the `.git` directory is never served; it also revalidates files
+on each visit so a deploy shows up at once (the JavaScript modules have stable names), and serves
+`404.html` with a real 404 status:
 
 ```caddy
 あそぼ.みんな {
@@ -120,7 +121,7 @@ JavaScript modules have stable names), and serve `404.html` with a real 404 stat
     encode zstd gzip
     header Cache-Control "no-cache"
     file_server {
-        hide .git
+        hide .*
     }
 
     handle_errors {
