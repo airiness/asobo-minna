@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Image renderer</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body { padding: 24px; display: grid; gap: 24px; justify-items: start; }
+    canvas { max-width: 100%; height: auto; border: 1px solid #2e2759; }
+    a { color: #3ef0ff; }
+  </style>
+</head>
+<body>
+  <!-- Renders og.png, apple-touch-icon.png and the favicon PNGs with the site's own fonts.
+       Serve the repository root locally, open /tools/render-images.html and save each image. -->
+  <p>Share image and icons. Click a link to save the PNG into the repository root.</p>
+  <div id="out"></div>
+  <script type="module">
+    const COLORS = ["#ff4fa3", "#3ef0ff", "#d8ff4f", "#ff7a3d", "#3ef0ff", "#ff4fa3", "#ffd166", "#d8ff4f"];
+    const LABELS = ["あ", "そ", "ぼ", "。", "み", "ん", "な", "。"];
+
+    function tile(g, x, y, size, label, color, glow = 1) {
+      g.save();
+      g.shadowColor = color;
+      g.shadowBlur = 22 * glow;
+      g.fillStyle = "rgba(9, 7, 26, 0.94)";
+      g.strokeStyle = color;
+      g.lineWidth = Math.max(2, size * 0.035);
+      g.beginPath();
+      g.roundRect(x, y, size, size, size * 0.2);
+      g.fill();
+      g.stroke();
+      g.shadowBlur = 18 * glow;
+      if (label === "。") {
+        g.strokeStyle = "#fff";
+        g.lineWidth = size * 0.075;
+        g.beginPath();
+        g.arc(x + size / 2, y + size / 2, size * 0.15, 0, Math.PI * 2);
+        g.stroke();
+      } else {
+        g.fillStyle = "#fff";
+        g.font = `800 ${Math.round(size * 0.6)}px "Asobo Neon"`;
+        g.textAlign = "center";
+        g.textBaseline = "alphabetic";
+        const m = g.measureText(label);
+        g.fillText(label, x + size / 2, y + size / 2 + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+      }
+      g.restore();
+    }
+
+    function nightBackground(g, w, h) {
+      const bg = g.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, "#07051a");
+      bg.addColorStop(0.6, "#110d29");
+      bg.addColorStop(1, "#0d0a22");
+      g.fillStyle = bg;
+      g.fillRect(0, 0, w, h);
+      const pink = g.createRadialGradient(w * 0.25, h * 0.45, 0, w * 0.25, h * 0.45, w * 0.45);
+      pink.addColorStop(0, "rgba(255, 79, 163, 0.18)");
+      pink.addColorStop(1, "rgba(255, 79, 163, 0)");
+      g.fillStyle = pink;
+      g.fillRect(0, 0, w, h);
+    }
+
+    function og() {
+      const c = document.createElement("canvas");
+      c.width = 1200;
+      c.height = 630;
+      const g = c.getContext("2d");
+      nightBackground(g, c.width, c.height);
+      g.fillStyle = "rgba(255, 255, 255, 0.025)";
+      for (let x = 46; x < c.width; x += 48) {
+        g.fillRect(x, 0, 2, c.height);
+      }
+      for (let i = 0; i < 40; i++) {
+        g.fillStyle = `rgba(255, 255, 255, ${0.2 + ((i * 37) % 50) / 100})`;
+        g.fillRect((i * 263) % 1200, (i * 97) % 140, 2, 2);
+      }
+
+      // Signboard
+      const size = 118;
+      const gap = 16;
+      const bx = 70;
+      const by = 150;
+      g.fillStyle = "#0a0819";
+      g.strokeStyle = "#262049";
+      g.lineWidth = 2;
+      g.beginPath();
+      g.roundRect(bx - 24, by - 24, size * 4.5 + gap * 3 + 48, size * 2 + gap + 48, 18);
+      g.fill();
+      g.stroke();
+      LABELS.forEach((label, i) => {
+        const row = i < 4 ? 0 : 1;
+        const col = i % 4;
+        const x = bx + col * (size + gap) + row * size * 0.5;
+        const y = by + row * (size + gap);
+        tile(g, x, y, size, label, COLORS[i], 1.2);
+      });
+
+      // Copy
+      g.fillStyle = "#f4f0ff";
+      g.font = '58px "Asobo Dela"';
+      g.textBaseline = "alphabetic";
+      g.fillText("夜のちいさな", 750, 230);
+      g.fillText("ゲームセンター", 750, 302);
+      g.fillStyle = "#ff4fa3";
+      g.font = '40px "Asobo QingKe"';
+      g.fillText("深夜的小小游戏厅", 752, 370);
+
+      g.save();
+      g.font = '800 44px "Asobo Neon"';
+      g.fillStyle = "#fff";
+      g.shadowColor = "#3ef0ff";
+      g.shadowBlur = 18;
+      g.fillText("あそぼ.みんな", 752, 520);
+      g.restore();
+
+      // Sidewalk
+      g.fillStyle = "#1d1842";
+      g.fillRect(0, 586, c.width, 44);
+      g.fillStyle = "#3d3670";
+      g.fillRect(0, 586, c.width, 3);
+      return c;
+    }
+
+    function icon(px, glow) {
+      const c = document.createElement("canvas");
+      c.width = c.height = px;
+      const g = c.getContext("2d");
+      g.fillStyle = "#0b0820";
+      g.fillRect(0, 0, px, px);
+      const inset = px * 0.12;
+      tile(g, inset, inset, px - inset * 2, "あ", "#ff4fa3", glow);
+      return c;
+    }
+
+    await document.fonts.load('800 40px "Asobo Neon"');
+    await document.fonts.load('40px "Asobo Dela"');
+    await document.fonts.load('40px "Asobo QingKe"');
+
+    const images = {
+      "og.png": og(),
+      "apple-touch-icon.png": icon(180, 0.8),
+      "favicon-32.png": icon(32, 0.15),
+      "favicon-16.png": icon(16, 0)
+    };
+    const out = document.getElementById("out");
+    window.renderedImages = {};
+    for (const [name, canvas] of Object.entries(images)) {
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      window.renderedImages[name] = blob;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      link.textContent = `Save ${name}`;
+      out.append(link, canvas);
+    }
+    window.imagesReady = true;
+  </script>
+</body>
+</html>

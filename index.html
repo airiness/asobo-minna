@@ -2,113 +2,244 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f0e8">
-  <meta name="description" content="あそぼ。みんな。— 小さなブラウザゲームを集める遊び場。">
-  <title>あそぼ。みんな。</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0820">
+  <meta name="color-scheme" content="dark">
+  <title>あそぼ.みんな｜夜のちいさなゲームセンター</title>
+  <meta name="description" content="ブラウザでそのまま遊べる、夜のちいさなゲームセンター。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="あそぼ.みんな">
+  <meta property="og:title" content="あそぼ.みんな">
+  <meta property="og:description" content="ブラウザでそのまま遊べる、夜のちいさなゲームセンター。／打开浏览器就能玩的、深夜小小游戏厅。">
+  <meta property="og:url" content="https://xn--l8jucve.xn--q9jyb4c/">
+  <meta property="og:image" content="https://xn--l8jucve.xn--q9jyb4c/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/neon.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script type="module" src="/js/main.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <p class="eyebrow">SMALL WEB GAMES · GGLAB</p>
-      <h1>あそぼ。<br><span>みんな。</span></h1>
-      <p class="lead">
-        ブラウザを開けば、そこが遊び場。<br>
-        小さなゲームを少しずつ置いていきます。
+  <header class="topbar">
+    <a class="brand" href="/">あそぼ.みんな</a>
+    <div class="hud">
+      <p class="hud-credit" aria-live="polite">
+        <span class="sr-only" data-i18n="hud.credit">クレジット</span>
+        <span class="coin-icon" aria-hidden="true"></span>
+        <b class="px"><span class="credit-word" id="credit-word">CREDIT</span> <span id="credit">03</span></b>
       </p>
-    </header>
+      <a class="hud-stamps needs-js" href="#stamps">
+        <span class="hanko-icon" aria-hidden="true"></span>
+        <span class="sr-only" data-i18n="hud.stamps">スタンプ</span>
+        <b id="stamp-count" class="px">0/16</b>
+      </a>
+      <button class="hud-btn needs-js" id="sound-toggle" type="button" aria-pressed="false"
+        aria-label="効果音をオンにする">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="spk" d="M4 9h4l5-4v14l-5-4H4z"></path>
+          <path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"></path>
+          <path class="mute" d="M16 9l5 6M21 9l-5 6"></path>
+        </svg>
+      </button>
+      <button class="hud-btn hud-lang needs-js" id="lang-toggle" type="button"
+        aria-label="中文に切り替える">中文</button>
+    </div>
+  </header>
 
-    <section class="games" aria-labelledby="games-title">
-      <div class="section-heading">
-        <h2 id="games-title">games</h2>
-        <span>02</span>
+  <main>
+    <section class="street" id="street" aria-labelledby="sign">
+      <div class="street-inner">
+        <div class="signboard">
+          <h1 class="sign" id="sign" aria-label="あそぼ。みんな。">
+            <span class="sign-row">
+              <span class="slot"><span class="tile c-pink">あ</span></span>
+              <span class="slot"><span class="tile c-cyan">そ</span></span>
+              <span class="slot"><span class="tile c-acid">ぼ</span></span>
+              <span class="slot"><span class="tile c-orange dot">。</span></span>
+            </span>
+            <span class="sign-row">
+              <span class="slot"><span class="tile c-cyan">み</span></span>
+              <span class="slot"><span class="tile c-pink flaky">ん</span>
+                <button class="coin" type="button" data-coin="sign" hidden
+                  data-i18n-aria="coin.aria" aria-label="コインをひろう"></button></span>
+              <span class="slot"><span class="tile c-gold">な</span></span>
+              <span class="slot"><span class="tile c-acid dot">。</span></span>
+            </span>
+          </h1>
+          <p class="sign-sub display" data-i18n="sign.sub"></p>
+        </div>
+
+        <div class="shopinfo">
+          <p class="tagline display" data-i18n="hero.tagline">ブラウザでそのまま遊べる、夜のちいさなゲームセンター。</p>
+          <p class="plate" data-i18n="hero.plate">年中無休 ・ 入場無料 ・ 全台フリープレイ</p>
+        </div>
+
+        <p class="open-sign" id="open-sign" data-i18n="hero.open">営業中</p>
+
+        <div class="street-actions needs-js">
+          <p class="hint" id="hint" data-i18n="hero.hint">看板、ちょっとゆるんでます。</p>
+          <button class="repair" id="repair" type="button" hidden data-i18n="hero.repair">看板を直す</button>
+        </div>
       </div>
+      <div class="sidewalk" aria-hidden="true"></div>
+      <canvas class="toybox" id="toybox" aria-hidden="true"></canvas>
+    </section>
 
-      <a class="game-card" href="https://coop.あそぼ.みんな/" aria-label="スターコア・ガーディアンを遊ぶ">
-        <div class="game-visual" aria-hidden="true">
-          <div class="core"></div>
-          <div class="orbit orbit-a"></div>
-          <div class="orbit orbit-b"></div>
-          <div class="spark spark-a"></div>
-          <div class="spark spark-b"></div>
-          <div class="spark spark-c"></div>
+    <section class="floor" id="floor" aria-labelledby="floor-title">
+      <div class="floor-inner">
+        <div class="floor-head">
+          <h2 class="display" id="floor-title" data-i18n="floor.title">1F ビデオゲーム</h2>
+          <p class="floor-count" data-i18n="floor.count">稼働中 2台</p>
         </div>
 
-        <div class="game-copy">
-          <div class="game-meta">
-            <span class="status"><i></i> PLAYABLE</span>
-            <span>01</span>
-          </div>
-
-          <div>
-            <p class="kicker">SOLO / 2 PLAYER CO-OP</p>
-            <h3>スターコア・ガーディアン</h3>
-            <p class="description">
-              星核を守りながら、迫りくる敵を撃ち抜く。
-              ソロでも、友だちとふたりでも。QRコードで招待して、別々のスマホから一緒に守ろう。
-            </p>
-          </div>
-
-          <div class="card-footer">
-            <div class="tags">
-              <span>WEBGL</span>
-              <span>1–2 PLAYERS</span>
-              <span>QR INVITE</span>
+        <div class="cabinets">
+          <article class="cabinet cab-cyan" data-game="coop">
+            <header class="marquee">
+              <h3 class="display" lang="ja">スターコア・ガーディアン</h3>
+              <p class="gloss display" data-i18n="coop.gloss"></p>
+            </header>
+            <div class="screen">
+              <canvas class="attract" data-demo="coop" aria-hidden="true"></canvas>
+              <p class="screen-msg px" aria-hidden="true">INSERT COIN</p>
             </div>
-            <span class="play">あそぶ <b>↗</b></span>
-          </div>
-        </div>
-      </a>
-
-      <a class="game-card game-card--blindbox" href="https://box.あそぼ.みんな/" aria-label="星くずボックスを遊ぶ">
-        <div class="game-visual blindbox-visual" aria-hidden="true">
-          <div class="blindbox-box">
-            <div class="blindbox-lid"></div>
-            <div class="blindbox-star">★</div>
-            <div class="blindbox-face"></div>
-          </div>
-          <div class="blindbox-orb orb-1"></div>
-          <div class="blindbox-orb orb-2"></div>
-          <div class="blindbox-orb orb-3"></div>
-        </div>
-
-        <div class="game-copy">
-          <div class="game-meta">
-            <span class="status"><i></i> PLAYABLE</span>
-            <span>02</span>
-          </div>
-
-          <div>
-            <p class="kicker">1 PLAYER · COLLECTION TOY</p>
-            <h3><span>星くず</span><wbr><span>ボックス</span></h3>
-            <p class="description">
-              箱を開けて、小さな仲間を集めよう。
-              Three.js で遊ぶ、ゆるいコレクション系ブラインドボックス。
-            </p>
-          </div>
-
-          <div class="card-footer">
-            <div class="tags">
-              <span>THREE.JS</span>
-              <span>WEBGL</span>
-              <span>COLLECT</span>
+            <div class="controls needs-js">
+              <div class="stick" aria-hidden="true">
+                <span class="stick-knob"></span>
+              </div>
+              <div class="buttons">
+                <button class="pad pad-a" type="button" data-pad="a">A</button>
+                <button class="pad pad-b" type="button" data-pad="b">B</button>
+              </div>
             </div>
-            <span class="play">あそぶ <b>↗</b></span>
-          </div>
-        </div>
-      </a>
+            <div class="cab-body">
+              <p class="desc" data-i18n="coop.desc">星核を守って、30ウェーブを生きのびろ。ひとりでも、同じ画面でふたりでも。QRコードで、友だちのスマホと一緒に守れます。</p>
+              <ul class="tags">
+                <li data-i18n="coop.tag1">1〜2人</li>
+                <li data-i18n="coop.tag2">協力プレイ</li>
+                <li data-i18n="coop.tag3">QR招待</li>
+              </ul>
+              <a class="play" href="https://coop.あそぼ.みんな/">
+                <span class="slot-icon" aria-hidden="true"><i class="coin-drop"></i></span>
+                <span class="play-label display" data-i18n="cab.play">あそぶ</span>
+                <span class="play-arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
 
-      <div class="coming-soon">
-        <span>03</span>
-        <p>more games are cooking...</p>
+          <article class="cabinet cab-pink" data-game="box">
+            <header class="marquee">
+              <h3 class="display" lang="ja">星くずボックス</h3>
+              <p class="gloss display" data-i18n="box.gloss"></p>
+            </header>
+            <div class="screen">
+              <canvas class="attract" data-demo="box" aria-hidden="true"></canvas>
+              <p class="screen-msg px" aria-hidden="true">INSERT COIN</p>
+            </div>
+            <div class="controls needs-js">
+              <div class="stick" aria-hidden="true">
+                <span class="stick-knob"></span>
+              </div>
+              <div class="buttons">
+                <button class="pad pad-a" type="button" data-pad="a">A</button>
+                <button class="pad pad-b" type="button" data-pad="b">B</button>
+              </div>
+            </div>
+            <div class="cab-body">
+              <p class="desc" data-i18n="box.desc">箱をあけて、小さな仲間を集めよう。全24種、なにが出るかはお楽しみ。</p>
+              <ul class="tags">
+                <li data-i18n="box.tag1">1人</li>
+                <li data-i18n="box.tag2">コレクション</li>
+                <li data-i18n="box.tag3">3D</li>
+              </ul>
+              <a class="play" href="https://box.あそぼ.みんな/">
+                <span class="slot-icon" aria-hidden="true"><i class="coin-drop"></i></span>
+                <span class="play-label display" data-i18n="cab.play">あそぶ</span>
+                <span class="play-arrow" aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="cabinet cabinet-soon" id="soon">
+            <div class="soon-inside" aria-hidden="true">
+              <canvas class="attract" data-demo="soon"></canvas>
+              <button class="coin" type="button" data-coin="soon" hidden
+                data-i18n-aria="coin.aria" aria-label="コインをひろう"></button>
+              <p class="soon-secret display" data-i18n="soon.secret">まだ ひみつ。</p>
+            </div>
+            <div class="sheet" aria-hidden="true"></div>
+            <div class="note">
+              <h3 class="display" data-i18n="soon.title">調整中</h3>
+              <p data-i18n="soon.note">つぎのゲームを準備しています。</p>
+              <button class="peek needs-js" id="peek" type="button" aria-pressed="false"
+                data-i18n="soon.peek">のぞく</button>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
-    <footer>
-      <span>あそぼ.みんな</span>
-      <a href="https://gglab.dev/">GGLab ↗</a>
-    </footer>
+    <section class="lounge needs-js" aria-labelledby="lounge-title">
+      <div class="lounge-inner">
+        <h2 class="display" id="lounge-title" data-i18n="lounge.title">休憩コーナー</h2>
+        <div class="lounge-grid">
+          <div class="vending-wrap">
+            <div class="vending" id="vending">
+              <p class="vm-brand display" data-i18n="vm.brand">あそぼドリンク</p>
+              <div class="vm-window" id="vm-window"></div>
+              <div class="vm-panel">
+                <p class="vm-roulette px" id="vm-roulette" aria-hidden="true">0000</p>
+                <p class="vm-notice" data-i18n="vm.notice">おしたのと ちがうのが でることが あります</p>
+                <span class="vm-slot" aria-hidden="true"></span>
+              </div>
+              <div class="vm-out">
+                <span class="vm-out-label" data-i18n="vm.out">とりだし口</span>
+                <button class="vm-can" id="vm-can" type="button" hidden></button>
+              </div>
+            </div>
+            <button class="vm-under" id="vm-under" type="button" data-i18n-aria="vm.under"
+              aria-label="自販機の下をのぞく"><span class="glint"></span></button>
+            <button class="coin" type="button" data-coin="vending" hidden
+              data-i18n-aria="coin.aria" aria-label="コインをひろう"></button>
+          </div>
+
+          <div class="lounge-side">
+            <div class="vm-result" id="vm-result" aria-live="polite">
+              <p class="vm-result-name display" id="vm-result-name" data-i18n="vm.prompt">ボタンを押して、1本どうぞ。</p>
+              <p class="vm-result-flavor" id="vm-result-flavor"></p>
+              <p class="vm-result-count px" id="vm-result-count"></p>
+            </div>
+
+            <div class="stampcard" id="stamps">
+              <div class="stampcard-head">
+                <h2 class="display" data-i18n="stamps.title">スタンプカード</h2>
+                <p class="regular-badge display" id="regular-badge" hidden></p>
+              </div>
+              <p class="stampcard-lead" data-i18n="stamps.lead">ぜんぶ集めると、いいことがあるかも。</p>
+              <ol class="stamp-grid" id="stamp-grid"></ol>
+              <p class="stamp-hint" id="stamp-hint" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer class="footer">
+    <p data-i18n="foot.hours">営業時間 24時間 ・ 定休日なし</p>
+    <p><a href="https://gglab.dev/" data-i18n="foot.gglab">運営 GGLab ↗</a></p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <span class="toast-stamp display" id="toast-stamp" aria-hidden="true"></span>
+    <span class="toast-text">
+      <b class="display" id="toast-title"></b>
+      <span id="toast-sub"></span>
+    </span>
+  </div>
 </body>
 </html>
