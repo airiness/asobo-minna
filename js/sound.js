@@ -133,6 +133,54 @@ const SOUNDS = {
   },
   pop(t) {
     tone("sine", 400, t, 0.12, { gain: 0.35, to: 1200 });
+  },
+  // Impact sounds for each tile material (js/materials.js); `v` is the impact strength 0..1.
+  boing(t, v = 1) {
+    tone("sine", 220, t, 0.22, { gain: 0.45 * v, to: 620 });
+    tone("triangle", 330, t + 0.02, 0.16, { gain: 0.15 * v, to: 900 });
+  },
+  clink(t, v = 1) {
+    tone("triangle", 2100, t, 0.09, { gain: 0.22 * v });
+    tone("sine", 3150, t + 0.01, 0.12, { gain: 0.12 * v });
+  },
+  puff(t, v = 1) {
+    hiss(t, 0.16, { gain: 0.35 * v, freq: 700, type: "lowpass" });
+  },
+  thudHeavy(t, v = 1) {
+    tone("sine", 90, t, 0.28, { gain: 0.8 * v, to: 38 });
+    hiss(t, 0.08, { gain: 0.3 * v, freq: 300, type: "lowpass" });
+  },
+  ding(t, v = 1) {
+    tone("sine", 1320, t, 0.45, { gain: 0.25 * v });
+    tone("sine", 2640, t, 0.3, { gain: 0.08 * v });
+  },
+  swish(t) {
+    const src = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const amp = ctx.createGain();
+    src.buffer = noise;
+    filter.type = "bandpass";
+    filter.Q.value = 1.2;
+    filter.frequency.setValueAtTime(700, t);
+    filter.frequency.exponentialRampToValueAtTime(3200, t + 0.25);
+    amp.gain.setValueAtTime(0.0001, t);
+    amp.gain.exponentialRampToValueAtTime(0.5, t + 0.05);
+    amp.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    src.connect(filter).connect(amp).connect(master);
+    src.start(t);
+    src.stop(t + 0.32);
+    [784, 1047].forEach((f, i) => tone("square", f, t + 0.12 + i * 0.09, 0.12, { gain: 0.16 }));
+  },
+  snap(t) {
+    tone("square", 1200, t, 0.03, { gain: 0.25 });
+    tone("square", 1800, t + 0.04, 0.05, { gain: 0.25 });
+  },
+  crack(t) {
+    hiss(t, 0.12, { gain: 0.7, freq: 2500, type: "highpass" });
+    tone("square", 160, t, 0.12, { gain: 0.3, to: 70 });
+  },
+  word(t) {
+    [659, 784, 988, 1319].forEach((f, i) => tone("triangle", f, t + i * 0.07, 0.16, { gain: 0.25 }));
   }
 };
 

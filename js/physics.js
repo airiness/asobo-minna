@@ -1,6 +1,7 @@
 // A small 2D rigid-body solver for boxes, ported from Erin Catto's Box2D-Lite (MIT License, see
 // THIRD_PARTY_NOTICES.md): box-box contacts from SAT plus edge clipping, sequential impulses with
-// accumulated, warm-started impulses, and a soft mouse joint for dragging. Units are meters and
+// accumulated, warm-started impulses, a soft mouse joint for dragging and a weld joint. Added on
+// top of Box2D-Lite: restitution, per-body gravity scale and damping. Units are meters and
 // seconds, with +y pointing down the screen.
 
 const EDGE1 = 1;
@@ -21,7 +22,14 @@ export class Body {
     this.vx = 0;
     this.vy = 0;
     this.av = 0;
+    this.pvx = 0;
+    this.pvy = 0;
+    this.pav = 0;
     this.friction = 0.5;
+    this.restitution = 0;
+    this.gravityScale = 1;
+    this.linearDamping = 0.05;
+    this.angularDamping = 0.4;
     if (Number.isFinite(mass)) {
       this.invMass = 1 / mass;
       this.invI = 12 / (mass * (width * width + height * height));
@@ -244,6 +252,7 @@ class Arbiter {
     this.b = b;
     this.contacts = contacts;
     this.friction = Math.sqrt(a.friction * b.friction);
+    this.restitution = Math.max(a.restitution, b.restitution);
   }
 
   update(contacts) {
@@ -278,7 +287,28 @@ class Arbiter {
       c.massT = 1 / kt;
       c.bias = -0.2 * invDt * Math.min(0, c.sep + 0.01);
 
-      // Warm start with last step's impulses.
+      // Restitution targets a separating velocity proportional to the approach speed. The speed
+      // is taken before this step's gravity and warm starting; otherwise each bounce gains the
+      // gravity added during the step and a resting bouncy body never settles.
+      const dvx = b.pvx - b.pav * r2y - a.pvx + a.pav * r1y;
+      const dvy = b.pvy + b.pav * r2x - a.pvy - a.pav * r1x;
+      const vn = dvx * c.nx + dvy * c.ny;
+      if (this.restitution > 0 && vn < -1) {
+        c.bias = Math.max(c.bias, -this.restitution * vn);
+      }
+    }
+  }
+
+  // Applies last step's impulses; runs after every arbiter's preStep.
+  warmStart() {
+    const { a, b } = this;
+    for (const c of this.contacts) {
+      const r1x = c.x - a.x;
+      const r1y = c.y - a.y;
+      const r2x = c.x - b.x;
+      const r2y = c.y - b.y;
+      const tx = c.ny;
+      const ty = -c.nx;
       const px = c.pn * c.nx + c.pt * tx;
       const py = c.pn * c.ny + c.pt * ty;
       a.vx -= a.invMass * px;
@@ -355,6 +385,10 @@ export class MouseJoint {
     this.iy = 0;
   }
 
+  involves(body) {
+    return body === this.body;
+  }
+
   setTarget(wx, wy) {
     this.tx = wx;
     this.ty = wy;
@@ -419,14 +453,125 @@ export class MouseJoint {
   }
 }
 
+// Holds two bodies together at their current relative pose (point + angle constraints).
+export class WeldJoint {
+  constructor(a, b) {
+    this.a = a;
+    this.b = b;
+    const wx = (a.x + b.x) / 2;
+    const wy = (a.y + b.y) / 2;
+    this.la = toLocal(a, wx, wy);
+    this.lb = toLocal(b, wx, wy);
+    this.ref = b.rot - a.rot;
+    this.px = 0;
+    this.py = 0;
+    this.pa = 0;
+  }
+
+  involves(body) {
+    return body === this.a || body === this.b;
+  }
+
+  other(body) {
+    return body === this.a ? this.b : this.a;
+  }
+
+  preStep(dt) {
+    const { a, b } = this;
+    const invDt = dt > 0 ? 1 / dt : 0;
+    const ra = toWorldOffset(a, this.la);
+    const rb = toWorldOffset(b, this.lb);
+    this.ra = ra;
+    this.rb = rb;
+    const k11 = a.invMass + b.invMass + a.invI * ra.y * ra.y + b.invI * rb.y * rb.y;
+    const k12 = -a.invI * ra.x * ra.y - b.invI * rb.x * rb.y;
+    const k22 = a.invMass + b.invMass + a.invI * ra.x * ra.x + b.invI * rb.x * rb.x;
+    const det = k11 * k22 - k12 * k12;
+    const inv = det !== 0 ? 1 / det : 0;
+    this.m11 = inv * k22;
+    this.m12 = -inv * k12;
+    this.m22 = inv * k11;
+    const iSum = a.invI + b.invI;
+    this.angMass = iSum > 0 ? 1 / iSum : 0;
+    this.bx = -0.2 * invDt * (b.x + rb.x - a.x - ra.x);
+    this.by = -0.2 * invDt * (b.y + rb.y - a.y - ra.y);
+    this.ba = -0.2 * invDt * (b.rot - a.rot - this.ref);
+
+    a.vx -= a.invMass * this.px;
+    a.vy -= a.invMass * this.py;
+    a.av -= a.invI * (ra.x * this.py - ra.y * this.px + this.pa);
+    b.vx += b.invMass * this.px;
+    b.vy += b.invMass * this.py;
+    b.av += b.invI * (rb.x * this.py - rb.y * this.px + this.pa);
+  }
+
+  applyImpulse() {
+    const { a, b, ra, rb } = this;
+    const la = this.angMass * (-(b.av - a.av) + this.ba);
+    this.pa += la;
+    a.av -= a.invI * la;
+    b.av += b.invI * la;
+
+    const cdx = b.vx - b.av * rb.y - a.vx + a.av * ra.y;
+    const cdy = b.vy + b.av * rb.x - a.vy - a.av * ra.x;
+    const qx = -cdx + this.bx;
+    const qy = -cdy + this.by;
+    const jx = this.m11 * qx + this.m12 * qy;
+    const jy = this.m12 * qx + this.m22 * qy;
+    this.px += jx;
+    this.py += jy;
+    a.vx -= a.invMass * jx;
+    a.vy -= a.invMass * jy;
+    a.av -= a.invI * (ra.x * jy - ra.y * jx);
+    b.vx += b.invMass * jx;
+    b.vy += b.invMass * jy;
+    b.av += b.invI * (rb.x * jy - rb.y * jx);
+  }
+}
+
+function toLocal(body, wx, wy) {
+  const c = Math.cos(body.rot);
+  const s = Math.sin(body.rot);
+  const dx = wx - body.x;
+  const dy = wy - body.y;
+  return { x: c * dx + s * dy, y: -s * dx + c * dy };
+}
+
+function toWorldOffset(body, local) {
+  const c = Math.cos(body.rot);
+  const s = Math.sin(body.rot);
+  return { x: c * local.x - s * local.y, y: s * local.x + c * local.y };
+}
+
+function pairKey(a, b) {
+  return a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
+}
+
 export class World {
   constructor(gravity = 10) {
     this.gravity = gravity;
     this.bodies = [];
     this.arbiters = new Map();
     this.joints = new Set();
+    this.noCollide = new Set();
     this.iterations = 10;
     this.onImpact = null;
+  }
+
+  // Welds two bodies and stops them colliding with each other.
+  weld(a, b) {
+    const joint = new WeldJoint(a, b);
+    this.joints.add(joint);
+    this.noCollide.add(pairKey(a, b));
+    this.arbiters.delete(pairKey(a, b));
+    return joint;
+  }
+
+  removeJoint(joint) {
+    this.joints.delete(joint);
+    if (joint instanceof WeldJoint) {
+      this.noCollide.delete(pairKey(joint.a, joint.b));
+    }
   }
 
   add(body) {
@@ -442,8 +587,8 @@ export class World {
       }
     }
     for (const j of this.joints) {
-      if (j.body === body) {
-        this.joints.delete(j);
+      if (j.involves(body)) {
+        this.removeJoint(j);
       }
     }
   }
@@ -461,6 +606,9 @@ export class World {
           [a, b] = [b, a];
         }
         const key = `${a.id}:${b.id}`;
+        if (this.noCollide.has(key)) {
+          continue;
+        }
         const reach = (Math.hypot(a.w, a.h) + Math.hypot(b.w, b.h)) / 2;
         const contacts =
           Math.abs(a.x - b.x) > reach || Math.abs(a.y - b.y) > reach ? [] : collide(a, b);
@@ -477,7 +625,7 @@ export class World {
             const rvx = b.vx - a.vx;
             const rvy = b.vy - a.vy;
             const speed = Math.abs(rvx * contacts[0].nx + rvy * contacts[0].ny);
-            this.onImpact(speed, a, b);
+            this.onImpact(speed, a, b, contacts[0]);
           }
         }
       }
@@ -488,17 +636,23 @@ export class World {
     const invDt = dt > 0 ? 1 / dt : 0;
     this.broadPhase();
     for (const b of this.bodies) {
+      b.pvx = b.vx;
+      b.pvy = b.vy;
+      b.pav = b.av;
       if (b.invMass === 0) {
         continue;
       }
-      b.vy += dt * this.gravity;
-      const damp = 1 / (1 + dt * 0.05);
+      b.vy += dt * this.gravity * b.gravityScale;
+      const damp = 1 / (1 + dt * b.linearDamping);
       b.vx *= damp;
       b.vy *= damp;
-      b.av *= 1 / (1 + dt * 0.4);
+      b.av *= 1 / (1 + dt * b.angularDamping);
     }
     for (const arb of this.arbiters.values()) {
       arb.preStep(invDt);
+    }
+    for (const arb of this.arbiters.values()) {
+      arb.warmStart();
     }
     for (const j of this.joints) {
       j.preStep(dt);

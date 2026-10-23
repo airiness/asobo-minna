@@ -16,7 +16,8 @@ license text with each copyright line is next to the fonts.
 ## Code
 
 `js/physics.js` is a JavaScript port of the box-box collision and sequential-impulse solver from
-Box2D-Lite by Erin Catto (https://github.com/erincatto/box2d-lite), used under the MIT License:
+Box2D-Lite by Erin Catto (https://github.com/erincatto/box2d-lite), extended with restitution
+and a weld joint, used under the MIT License:
 
 ```text
 MIT License

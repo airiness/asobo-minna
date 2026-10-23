@@ -10,6 +10,8 @@ function defaults() {
     stamps: {},
     drinks: [],
     coins: [],
+    words: [],
+    hoopBest: 0,
     sound: false,
     lang: null
   };
@@ -26,7 +28,10 @@ function sanitize(raw) {
   if (raw.stamps && typeof raw.stamps === "object") {
     base.stamps = { ...raw.stamps };
   }
-  for (const key of ["drinks", "coins"]) {
+  if (Number.isInteger(raw.hoopBest) && raw.hoopBest >= 0) {
+    base.hoopBest = Math.min(raw.hoopBest, 9999);
+  }
+  for (const key of ["drinks", "coins", "words"]) {
     if (Array.isArray(raw[key])) {
       base[key] = raw[key].slice(0, 32);
     }

@@ -337,7 +337,7 @@ h3 {
   gap: 28px 40px;
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 40px var(--gutter-r) calc(var(--tile) * 2.1 + 24px) var(--gutter);
+  padding: 40px var(--gutter-r) calc(var(--tile) * 3.6 + 24px) var(--gutter);
 }
 
 .signboard {
@@ -580,8 +580,32 @@ h3 {
   }
 }
 
-.slot.gone .tile {
-  visibility: hidden;
+/* An empty slot glows when a dragged block is close enough to snap into it. */
+.slot.target::before {
+  border-style: solid;
+  border-color: var(--acid);
+  box-shadow:
+    0 0 14px rgba(216, 255, 79, 0.6),
+    inset 0 0 10px rgba(216, 255, 79, 0.35);
+  animation: target-pulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes target-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* Tiles that just spelled a word hop. */
+.tile.cheer {
+  animation: cheer 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes cheer {
+  35% {
+    translate: 0 -16%;
+    scale: 1.08;
+  }
 }
 
 .tile.relight {
@@ -801,7 +825,7 @@ h3 {
 
   .open-sign {
     top: auto;
-    bottom: calc(var(--tile) * 2.1 + 92px);
+    bottom: calc(var(--tile) * 3.6 + 92px);
     font-size: 15px;
   }
 
@@ -1797,8 +1821,12 @@ h3 {
   }
 
   .stamp-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding-left: 20px;
+    gap: 12px 6px;
+    padding-left: 18px;
+  }
+
+  .stamp-mark {
+    width: 44px;
   }
 }
 

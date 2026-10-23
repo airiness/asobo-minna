@@ -15,19 +15,27 @@ games live in their own repositories and are routed through subdomains.
 
 - **Neon sign.** Each character of あそぼ。みんな。 is a neon tile. Tapping a tile loosens it,
   then it hangs from one screw, then it falls onto the sidewalk. After three tiles fall the
-  whole sign gives out. Fallen tiles are physical blocks that can be dragged, thrown and
-  stacked (`js/physics.js`); "repair" puts them back.
+  whole sign gives out. "Repair" sends every tile back to its own slot.
+- **Sidewalk toy box** (`js/toybox.js`, `js/physics.js`). Fallen tiles are physical blocks that
+  can be dragged, thrown and stacked. Each color is a material (`js/materials.js`): pink is
+  bouncy, cyan slides like ice, acid green floats, orange is heavy, gold is hard metal.
+  Same-colored blocks stick together when they touch and split apart when slammed hard.
+- **Hoop** (`js/hoop.js`). Blocks thrown through the rim score: dunks, long-range 3-pointers and
+  doubled points for a stuck-together pair. The best score is remembered.
+- **Spelling.** A block dropped on an empty slot of the signboard is mounted there, so the sign
+  can spell other words (なみ, そんな, なんぼ…); each new word shows its meaning.
 - **Game floor.** One cabinet per game with an attract-mode demo drawn in code
   (`js/attract.js`). The stick and A/B buttons nudge the demo. The play button inserts a coin
   and then opens the game. The covered cabinet is the next game slot.
 - **Lounge.** A vending machine with a 7777 lottery and two drinks that only drop by mistake,
-  and a stamp card with twelve achievements.
+  and a stamp card with sixteen achievements.
 - **Japanese and Simplified Chinese.** The top bar switches language. Japanese is the default
   unless the browser prefers Chinese.
 - **Sound** is synthesized with Web Audio and off until the visitor turns it on.
 
-Progress (credits, stamps, drinks, coins, language and sound) stays in the visitor's
-`localStorage` only. Without JavaScript the page is still a working list of game links.
+Progress (credits, stamps, drinks, coins, words, best hoop score, language and sound) stays in
+the visitor's `localStorage` only. Without JavaScript the page is still a working list of game
+links.
 
 ## Stack
 
@@ -39,8 +47,11 @@ index.html            page markup; static Japanese copy lives here
 styles.css            all styles
 js/main.js            entry point
 js/strings.js         Japanese strings used only in script, and all Chinese strings
-js/sign.js            neon sign and the sidewalk toy box
-js/physics.js         2D box physics (Box2D-Lite port)
+js/sign.js            neon sign: tapping, falling, putting tiles back, spelling
+js/toybox.js          sidewalk physics playground: dragging, welding, drawing
+js/hoop.js            basketball hoop and scoring
+js/materials.js       per-color block materials
+js/physics.js         2D box physics (Box2D-Lite port with restitution and a weld joint)
 js/attract.js         cabinet demos
 js/cabinets.js        cabinet controls and the play button
 js/vending.js         vending machine

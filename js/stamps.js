@@ -16,7 +16,11 @@ export const STAMP_IDS = [
   "peek",
   "coins",
   "konami",
-  "midnight"
+  "midnight",
+  "basket",
+  "three",
+  "weld",
+  "word"
 ];
 
 const grid = document.getElementById("stamp-grid");
